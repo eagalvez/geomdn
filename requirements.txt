@@ -1,0 +1,12 @@
+haversine==2.5.1
+wheel==0.37.0
+Theano==0.9
+Lasagne==0.2.dev1
+sklearn==0.0
+networkx==2.6.3
+pandas==1.3.5
+matplotlib==2.2.3
+pyproj==3.3.0
+pyshp==2.1.3
+shapely==1.8.0
+seaborn==0.11.2

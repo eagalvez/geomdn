@@ -305,7 +305,7 @@ class DataLoader():
         assert len(nodes) == len(self.df_train) + len(self.df_dev) + len(self.df_test), 'duplicate target node'
         nodes_list = self.df_train.index.tolist() + self.df_dev.index.tolist() + self.df_test.index.tolist()
         node_id = {node:id for id, node in enumerate(nodes_list)}
-        g.add_nodes_from(node_id.values())
+        g.add_nodes_from(list(node_id.values()))
         for node in nodes:
             g.add_edge(node_id[node], node_id[node])
         pattern = '(?<=^|(?<=[^a-zA-Z0-9-_\\.]))@([A-Za-z]+[A-Za-z0-9_]+)'
@@ -362,7 +362,7 @@ class DataLoader():
             for id in idmentions:
                 g.add_edge(id, user_id)    
         celebrities = []
-        for i in xrange(len(nodes_list), len(node_id)):
+        for i in range(len(nodes_list), len(node_id)):
             deg = len(g[i])
             if deg == 1 or deg > self.celebrity_threshold:
                 celebrities.append(i)
@@ -370,7 +370,7 @@ class DataLoader():
         g.remove_nodes_from(celebrities)
             
         logging.info('projecting the graph')
-        g = efficient_collaboration_weighted_projected_graph2(g, range(len(nodes_list)))
+        g = efficient_collaboration_weighted_projected_graph2(g, list(range(len(nodes_list))))
         logging.info('#nodes: %d, #edges: %d' %(nx.number_of_nodes(g), nx.number_of_edges(g)))
         self.graph = g
 
@@ -416,7 +416,7 @@ class DataLoader():
         dev_locs = self.df_dev[['lat', 'lon']].values
         test_locs = self.df_test[['lat', 'lon']].values
         nnbr = NearestNeighbors(n_neighbors=1, algorithm='brute', leaf_size=1, metric=haversine, n_jobs=4)
-        nnbr.fit(np.array(self.cluster_median.values()))
+        nnbr.fit(np.array(list(self.cluster_median.values())))
         self.dev_classes = nnbr.kneighbors(dev_locs, n_neighbors=1, return_distance=False)[:, 0]
         self.test_classes = nnbr.kneighbors(test_locs, n_neighbors=1, return_distance=False)[:, 0]
 
@@ -519,7 +519,7 @@ class DataLoader():
         train_locs = np.transpose(np.vstack((mlat, mlon)))        
         ax = plt.gca()
         #fig = plt.figure()  # figsize=(4,4.2)
-        print fig.get_size_inches()
+        print(fig.get_size_inches())
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -586,7 +586,7 @@ class DataLoader():
         
         ax = plt.gca()
         #fig = plt.figure()  # figsize=(4,4.2)
-        print fig.get_size_inches()
+        print(fig.get_size_inches())
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -630,7 +630,7 @@ class DataLoader():
         plt.tight_layout()
         plt.savefig(filename)
         #plt.close()
-        print "the plot saved in " + filename 
+        print("the plot saved in " + filename) 
 
     def draw_kmeans_clusters(self, filename, figsize=(4,3)):
         import matplotlib as mpl
@@ -663,7 +663,7 @@ class DataLoader():
         ax = plt.gca()
         ax.xaxis.set_visible(False) 
         ax.yaxis.set_visible(False) 
-        for spine in ax.spines.itervalues(): 
+        for spine in ax.spines.values(): 
             spine.set_visible(False) 
 
         #fig = plt.figure()  # figsize=(4,4.2)
@@ -701,7 +701,7 @@ class DataLoader():
         plt.tight_layout()
         plt.savefig(filename)
         #plt.close()
-        print("the plot saved in " + filename) 
+        print(("the plot saved in " + filename)) 
             
     def draw_training_points(self, filename='points.pdf', world=False, figsize=(4,3)):
         '''
@@ -736,7 +736,7 @@ class DataLoader():
         ax = plt.gca()
         ax.xaxis.set_visible(False) 
         ax.yaxis.set_visible(False) 
-        for spine in ax.spines.itervalues(): 
+        for spine in ax.spines.values(): 
             spine.set_visible(False) 
 
         #fig = plt.figure()  # figsize=(4,4.2)
@@ -753,7 +753,7 @@ class DataLoader():
         plt.tight_layout()
         plt.savefig(filename)
         plt.close()
-        print("the plot saved in " + filename) 
+        print(("the plot saved in " + filename)) 
 
         
 if __name__ == '__main__':

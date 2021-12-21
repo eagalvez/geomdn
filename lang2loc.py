@@ -421,7 +421,7 @@ class NNModel_lang2loc():
                
         logging.info('training with %d n_epochs and  %d batch_size' %(self.n_epochs, self.batch_size))
         best_params = None
-        best_val_loss = sys.maxint
+        best_val_loss = sys.maxsize
         n_validation_down = 0
         
         for step in range(self.n_epochs):

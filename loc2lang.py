@@ -86,17 +86,17 @@ state_polygons = get_us_border_polygon()
 
 def in_us(lat, lon):
     p = Point(lon, lat)
-    for state, poly in state_polygons.iteritems():
+    for state, poly in state_polygons.items():
         if poly.contains(p):
             return state
     return None
 
 def inspect_inputs(i, node, fn):
-    print(i, node, "input(s) shape(s):", [input[0].shape for input in fn.inputs])
+    print((i, node, "input(s) shape(s):", [input[0].shape for input in fn.inputs]))
     #print(i, node, "input(s) stride(s):", [input.strides for input in fn.inputs], end='')
 
 def inspect_outputs(i, node, fn):
-    print(" output(s) shape(s):", [output[0].shape for output in fn.outputs])
+    print((" output(s) shape(s):", [output[0].shape for output in fn.outputs]))
     #print(" output(s) stride(s):", [output.strides for output in fn.outputs])    
 
 def softplus(x):
@@ -239,7 +239,7 @@ class Loc2Lang():
         else:
             logging.info('training with %d n_epochs and  %d batch_size' %(self.n_epochs, self.batch_size))
             best_params = None
-            best_val_loss = sys.maxint
+            best_val_loss = sys.maxsize
             n_validation_down = 0
             
             vis_gaussians_during_training = False
@@ -366,7 +366,7 @@ def get_named_entities(documents, mincount=10):
                 word_capital[word.lower()] += 1
             word_count[word.lower()] += 1
 
-    for word, count in word_count.iteritems():
+    for word, count in word_count.items():
         if count < mincount: continue
         capital = word_capital[word]
         percent = float(capital) / count
@@ -442,9 +442,9 @@ def load_data(data_home, **kwargs):
         #words that should be used in the output and be predicted
         w_freq = np.array(dl.X_train.sum(axis=0))[0]
         vocab = dl.vectorizer.get_feature_names()
-        vocab_freq = {vocab[i]: w_freq[i] for i in xrange(len(vocab))}
+        vocab_freq = {vocab[i]: w_freq[i] for i in range(len(vocab))}
         frequent_dare_words = set()
-        frequent_vocab_words = set([vocab[i] for i in xrange(len(vocab)) if w_freq[i] >= 100])
+        frequent_vocab_words = set([vocab[i] for i in range(len(vocab)) if w_freq[i] >= 100])
         for w in word_dialect:
             freq = vocab_freq.get(w, 0)
             if freq > 10:
@@ -469,7 +469,7 @@ def state_dialect_words(loc_train, vocab, model, N=1000):
     random_indices = indices[0:2 * N]
     sampled_locations = loc_train[random_indices, :]
     all_loc_state = utils.get_state_from_coordinates(sampled_locations)
-    locs = all_loc_state.keys()
+    locs = list(all_loc_state.keys())
     random.shuffle(locs)
     locs = locs[0: N]
     loc_state = {}
@@ -479,7 +479,7 @@ def state_dialect_words(loc_train, vocab, model, N=1000):
     dialect_states = utils.dialect_state
     state_dialects = defaultdict(set)
     new_dialect_states = defaultdict(set)
-    for dialect, states in dialect_states.iteritems():
+    for dialect, states in dialect_states.items():
         dialect = dialect.lower()
         states = set([s.lower() for s in states])
         new_dialect_states[dialect] = states
@@ -498,18 +498,18 @@ def state_dialect_words(loc_train, vocab, model, N=1000):
     
     locs = np.array(locs).astype('float32')
     sampled_predictions = model.predict(locs)
-    point_dialects = set([state.lower() for state in loc_state.values()])
+    point_dialects = set([state.lower() for state in list(loc_state.values())])
     #add related dialects for each state
-    for state, dls in state_dialects.iteritems():
+    for state, dls in state_dialects.items():
         for d in dls:
             point_dialects.add(d)
     word_dialect = get_dare_words()
-    word_dialect = {w:dialect for w, dialect in word_dialect.iteritems() if w in vocabset}
+    word_dialect = {w:dialect for w, dialect in word_dialect.items() if w in vocabset}
     dare_dialects = set(word_dialect.values())
     covered_dialects = dare_dialects & point_dialects
     logprobs = np.log(sampled_predictions)
     #logprobs = sampled_predictions
-    dialect_count = [(d, len(indices)) for d, indices in dialect_indices.iteritems()]
+    dialect_count = [(d, len(indices)) for d, indices in dialect_indices.items()]
     logging.info(dialect_count)
     global_mean_logprobs = np.mean(logprobs, axis=0)
     dialect_ranking = {}
@@ -521,7 +521,7 @@ def state_dialect_words(loc_train, vocab, model, N=1000):
         sorted_vocab_indices = np.argsort(dialect_normalized_logprobs)
         sorted_vocab = np.array(vocab)[sorted_vocab_indices].tolist()
         dialect_ranking[dialect] = list(reversed(sorted_vocab))
-    printable_dialect_ranking = {d:rank[0:200] for d, rank in dialect_ranking.iteritems()}
+    printable_dialect_ranking = {d:rank[0:200] for d, rank in dialect_ranking.items()}
     with open('./dumps/dialect_ranking_{}_hid{}_comp{}.json'.format(len(vocab), model.hid_size, model.n_gaus_comp) , 'w') as fout:
         json.dump(printable_dialect_ranking, fout, indent=4, sort_keys=True)
     #recall at k for each state
@@ -531,7 +531,7 @@ def state_dialect_words(loc_train, vocab, model, N=1000):
     k_recall = defaultdict(list)
     oracle_k_recall = defaultdict(list)
     for dialect in covered_dialects:
-        dialect_dare_words = set([w for w, d in word_dialect.iteritems() if d == dialect])
+        dialect_dare_words = set([w for w, d in word_dialect.items() if d == dialect])
         retrieved_words = dialect_ranking[dialect]
         oracle_retrieved = list(set(retrieved_words) & dialect_dare_words)
         logging.info('dialect %s DARE worlds in vocab: %d' %(dialect, len(oracle_retrieved)))
@@ -694,7 +694,7 @@ def train(data, **kwargs):
         logging.info('%d coords within continental US' %len(coords))
         coords = np.array(coords).astype('float32')
     else:
-        coords = np.array(map(list, product(lats, lons))).astype('float32')
+        coords = np.array(list(map(list, product(lats, lons)))).astype('float32')
 
     preds = model.predict(coords)
     if vis_words:
@@ -777,9 +777,9 @@ def map_words(coords, preds, vocab, map_dir, dataset_name):
     #pick some words to map including some known dialect words
     #some DARE words and some words that are not evenly distributed
     topk_words = []    
-    for words in region_words.values():
+    for words in list(region_words.values()):
         topk_words.extend(words)
-    topk_words.extend(word_dialect.keys())
+    topk_words.extend(list(word_dialect.keys()))
     dialect_words = ['hella', 'yall', 'jawn', 'paczki', 'euchre', 'brat', 'toboggan', 'brook', 'grinder', 'yinz', 'youze', 'yeen']
     topk_words.extend(dialect_words)
     custom_words = ['springfield', 'columbia', 'nigga', 'niqqa', 'bamma', 'cooter', 'britches', 'yapper', 'younguns', 'hotdish', 
@@ -839,7 +839,7 @@ def map_words(coords, preds, vocab, map_dir, dataset_name):
             ax = plt.gca()
             ax.xaxis.set_visible(False) 
             ax.yaxis.set_visible(False) 
-            for spine in ax.spines.itervalues(): 
+            for spine in ax.spines.values(): 
                 spine.set_visible(False) 
 
             state_names_set = set(short_state_names.values())
@@ -849,7 +849,7 @@ def map_words(coords, preds, vocab, map_dir, dataset_name):
                 if dataset_name == 'world-final': break
                 draw_state_name = True
                 if shapedict['NAME'] not in state_names_set: continue
-                short_name = short_state_names.keys()[short_state_names.values().index(shapedict['NAME'])]
+                short_name = list(short_state_names.keys())[list(short_state_names.values()).index(shapedict['NAME'])]
                 if short_name in printed_names and short_name not in ['MI', 'WI']: 
                     continue
                 if short_name == 'MI':
@@ -989,7 +989,7 @@ def visualise_gaussians(params=None, iter=None, output_type='pdf', **kwargs):
     ax = plt.gca()
     ax.xaxis.set_visible(False) 
     ax.yaxis.set_visible(False) 
-    for spine in ax.spines.itervalues(): 
+    for spine in ax.spines.values(): 
         spine.set_visible(False) 
     
     state_names_set = set(short_state_names.values())
@@ -999,7 +999,7 @@ def visualise_gaussians(params=None, iter=None, output_type='pdf', **kwargs):
         if dataset_name == 'world-final': break
         draw_state_name = True
         if shapedict['NAME'] not in state_names_set: continue
-        short_name = short_state_names.keys()[short_state_names.values().index(shapedict['NAME'])]
+        short_name = list(short_state_names.keys())[list(short_state_names.values()).index(shapedict['NAME'])]
         if short_name in printed_names and short_name not in ['MI', 'WI']: 
             continue
         if short_name == 'MI':
@@ -1035,7 +1035,7 @@ def visualise_gaussians(params=None, iter=None, output_type='pdf', **kwargs):
         #pdb.set_trace()
         printed_names += [short_name,] 
     
-    for k in xrange(mus.shape[0]):
+    for k in range(mus.shape[0]):
         #here x is longitude and y is latitude
         #apply softplus to sigmas (to make them positive)
         sigmax=np.log(1 + np.exp(sigmas[k][1]))
@@ -1083,7 +1083,7 @@ def tune(data, dataset_name, args, num_iter=100):
     logging.info('tuning over %s' %dataset_name)
     param_scores = []
     random.seed()
-    for i in xrange(num_iter):
+    for i in range(num_iter):
         logging.info('tuning iter %d' %i)
         np.random.seed(77)
         hidden_size = random.choice([300, 600, 900])

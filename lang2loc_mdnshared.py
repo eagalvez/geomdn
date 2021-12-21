@@ -143,8 +143,8 @@ def detect_nan(i, node, fn):
             if nans:
                 print('*** NaN detected ***')
                 theano.printing.debugprint(node)
-                print('Inputs : %s' % [input[0] for input in fn.inputs])
-                print('Outputs: %s' % [output[0] for output in fn.outputs])
+                print(('Inputs : %s' % [input[0] for input in fn.inputs]))
+                print(('Outputs: %s' % [output[0] for output in fn.outputs]))
                 break
 
 class NNModel_lang2locshared():
@@ -502,7 +502,7 @@ class NNModel_lang2locshared():
         
         logging.info('training with %d n_epochs and  %d batch_size' % (self.n_epochs, self.batch_size))
         best_params = None
-        best_val_loss = sys.maxint
+        best_val_loss = sys.maxsize
         n_validation_down = 0
         
         for step in range(self.n_epochs):
